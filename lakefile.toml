@@ -1,0 +1,10 @@
+name = "ml"
+version = "0.1.0"
+defaultTargets = ["ml"]
+
+[[lean_lib]]
+name = "Ml"
+
+[[lean_exe]]
+name = "ml"
+root = "Main"
