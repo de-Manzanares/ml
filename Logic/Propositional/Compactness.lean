@@ -13,6 +13,38 @@ theorem compactness_v1 (Γ : Set Formula) : finitelySatisfiableSet Γ → satisf
 
 ----------------------------------------------------------------------------------------------------
 
+/-- Unsatisfiablility is monotone under inclusion
+
+    If Γ0 is unsatisfiable and Γ0 ⊆ Γ1, then Γ1 is unsatisfiable.
+-/
+  lemma unsatisfiableSet_mono
+    {Γ0 Γ1 : Set Formula}
+    (hunsat : unsatisfiableSet Γ0)
+    (hsub : Γ0 ⊆ Γ1) :
+    -- for every truth assignment, there exists some A∈Γ0 left unsatisfied
+    unsatisfiableSet Γ1 := by
+    unfold unsatisfiableSet satisfiableSet at *
+    push Not at *
+    unfold SatisfiesSet at *
+    push Not at *
+
+    -- for some arbitrary truth assignment
+    intro φ
+
+    -- there exists some A∈Γ0 left unsatisfied
+    have hunsatφ : ∃ A ∈ Γ0, ¬Satisfies φ A :=
+      hunsat φ
+    obtain ⟨A, AinΓ0, unsatA⟩ := hunsatφ
+
+    -- this unsatisfied A∈Γ0 is also in Γ1, because Γ0⊆Γ1
+    have AinΓ1 : A ∈ Γ1 :=
+      hsub AinΓ0
+
+    -- for every truth assignment, there exists some A∈Γ1 left unsatisfied
+    exact ⟨A, AinΓ1, unsatA⟩
+
+----------------------------------------------------------------------------------------------------
+
 /-- Theorem 2.2.6: Compactness Theorem for Propositional Logic, Version II
 
   If Γ⊧B then there is a finite Δ⊆Γ such that Δ⊧B
@@ -53,52 +85,30 @@ theorem compactness_v2 (Γ : Set Formula) (B : Formula):
   -- our goal is now to show that Δ⊧B
   -- we will proceed by showing that if Δ0⊆Δ∪{¬B} ∧ Δ0 is unsatisfiable, then Δ∪{¬B} is unsatisfiable
 
-
   -- Δ0 is a subset of Δ∪{¬B}
   have Δ0subΔunion : Δ0 ⊆ Δ ∪ {Formula.neg B}:= by
     -- take some A ∈ Δ0
     intro A AinΔ0
-
     -- that A is in Γ∪{¬B} because A∈Δ0 ∧ Δ0⊆Γ∪{¬B}
     have AinUnion : A ∈ Γ ∪ {Formula.neg B} := Δ0sub AinΔ0
-
     -- for some A ∈ Γ∪{¬B}
     cases AinUnion with
-
     -- either A ∈ Γ
     | inl AinΓ =>
       left
       exact ⟨AinΓ, AinΔ0⟩
-
     -- or A∈{¬B}
     | inr AinNegB =>
       right
       exact AinNegB
 
   -- Δ ∪ {¬B} is unsatisfiable
-  have unsatΔunion: unsatisfiableSet (Δ ∪ {Formula.neg B}) := by
-
-    -- Δ0 is unsatisfiable means that
-    -- for any truth assignment φ,
-    -- there exists some A ∈ Δ0 left unsatisfied
-    unfold satisfiableSet SatisfiesSet at nsatΔ0
-    push Not at nsatΔ0
-    unfold unsatisfiableSet satisfiableSet SatisfiesSet
-    push Not
-    intro φ
-    obtain ⟨A, AinΔ0, nsatA⟩ := nsatΔ0 φ
-
-    use A
-
-    -- this A is in Δ∪{¬B} because A∈Δ0 ∧ Δ0⊆Δ∪{¬B}
-    constructor
-    exact Δ0subΔunion AinΔ0
-
-    -- this A is unsatisfied
-    exact nsatA
+  have unsatΔunion : unsatisfiableSet (Δ ∪ {Formula.neg B}) :=
+    unsatisfiableSet_mono nsatΔ0 Δ0subΔunion
 
   -- Δ∪{¬B} is unsatisfiable ↔ Δ⊧B
   exact (theorem_2_2_4 Δ B).mpr unsatΔunion
-  --------------------------------------------------------------------------------∎
+
+----------------------------------------------------------------------------------------------------
 
 end Logic.Propositional
