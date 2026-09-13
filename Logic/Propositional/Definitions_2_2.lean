@@ -13,7 +13,6 @@ def eval (φ : TruthAssignment) : Formula → Bool
   | Formula.neg A => !(eval φ A)
   | Formula.or A B => (eval φ A) || (eval φ B)
 
-
 /-- eval φ A = true -/
 def Satisfies (φ : TruthAssignment) (A : Formula) : Prop :=
   eval φ A = true
@@ -33,7 +32,8 @@ def unsatisfiable (A : Formula) : Prop :=
 def SatisfiesSet (φ : TruthAssignment) (Γ : Set Formula) : Prop :=
   ∀ A ∈ Γ, Satisfies φ A
 
-/-- a set of formulas is satisfiable if there exists a truth assignment that satisfies all formulas in the set -/
+/-- a set of formulas is satisfiable if there exists a truth assignment
+    that satisfies all formulas in the set -/
 def satisfiableSet (Γ : Set Formula) : Prop :=
   ∃ φ , SatisfiesSet φ Γ
 
@@ -41,11 +41,11 @@ def unsatisfiableSet (Γ : Set Formula) : Prop :=
   ¬ satisfiableSet Γ
 
 /-- Γ⊧B, read "B is a tautological consequence of Γ", means that
-    every truth assignment that satisfies Γ also satisfies B
--/
+    every truth assignment that satisfies Γ also satisfies B -/
 def tautologicalConsequence (Γ : Set Formula) (B : Formula) : Prop :=
   ∀ φ, SatisfiesSet φ Γ → Satisfies φ B
 
+/-- A set Γ is finitely satisfiable if every finite subset of Γ is satisfiable -/
 def finitelySatisfiableSet (Γ : Set Formula) : Prop :=
   ∀ Δ, (Set.Finite Δ ∧ Δ ⊆ Γ) → satisfiableSet Δ
 

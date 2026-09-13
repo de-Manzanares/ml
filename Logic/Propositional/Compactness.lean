@@ -1,4 +1,5 @@
 import Logic.Propositional.Theorem_2_2_4
+
 import Mathlib.Data.Set.Finite.Basic
 
 namespace Logic.Propositional
