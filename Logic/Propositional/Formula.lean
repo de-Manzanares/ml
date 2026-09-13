@@ -6,6 +6,7 @@ inductive Formula where
   | propvar : PropVar → Formula
   | neg : Formula → Formula
   | or : Formula → Formula → Formula
+deriving Repr, DecidableEq
 
 inductive IsFormula : Expression → Prop where
   | is_propvar : ∀ (p : PropVar),
