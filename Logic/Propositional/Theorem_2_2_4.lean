@@ -1,9 +1,11 @@
 import Logic.Propositional.Definitions_2_2
 
+import Mathlib.Tactic.Contrapose
+import Mathlib.Tactic.Basic
+
 namespace Logic.Propositional
 
-/--
-  Theorem 2.2.4:
+/-- Theorem 2.2.4:
 
   Γ⊧B ↔ Γ∪{¬B} is unsatisfiable
 
@@ -11,10 +13,10 @@ namespace Logic.Propositional
   if and only if
   Γ ∪ {¬B} is unsatisfiable.
 -/
-theorem theorem_2_2_4 (Γ : FormulaSet) (B : Formula) :
+theorem theorem_2_2_4 (Γ : Set Formula) (B : Formula) :
   tautologicalConsequence Γ B
   ↔
-  unsatisfiableSet (setUnion Γ (singletonSet (Formula.neg B))) := by
+  unsatisfiableSet (Γ ∪ {Formula.neg B}) := by
 
   -- break ↔ into two implications
   constructor
@@ -35,7 +37,6 @@ theorem theorem_2_2_4 (Γ : FormulaSet) (B : Formula) :
   -- if Γ∪{¬B} is satisfiable then there exists a truth assignment φ that satisfies Γ∪{¬B}
   unfold satisfiableSet at sat
   obtain ⟨φ, hUSat⟩ := sat
-  unfold setUnion at hUSat
 
   -- the goal is now to show that there exists a truth assignment φ that satisfies Γ but does not satisfy B
   unfold tautologicalConsequence
@@ -52,7 +53,7 @@ theorem theorem_2_2_4 (Γ : FormulaSet) (B : Formula) :
   exact hUSat A (Or.inl hA)
 
   -- assume A ∈ {¬B}, we need to show that φ does not satisfy B
-  simpa [satisfies] using hUSat (Formula.neg B) (Or.inr rfl)
+  simpa [Satisfies, eval] using hUSat (Formula.neg B) (Or.inr rfl)
 
   --------------------------------------------------------------------------------
 
@@ -90,7 +91,7 @@ theorem theorem_2_2_4 (Γ : FormulaSet) (B : Formula) :
   -- if A∈{¬B} then A = ¬B, and φ satisfies ¬B by hφB
   | inr hAnegB =>
     cases hAnegB
-    simpa [satisfies] using hφB
+    simpa [Satisfies, eval] using hφB
   -------------------------------------------------------------------------------∎
 
 end Logic.Propositional

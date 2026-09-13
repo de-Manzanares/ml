@@ -1,8 +1,6 @@
 import Logic.Propositional.Formula
 
-import Mathlib.Tactic.Contrapose
-import Mathlib.Tactic.Push
-import Mathlib.Tactic.Use
+import Mathlib.Basic.Finite.Defs
 
 namespace Logic.Propositional
 
@@ -10,43 +8,45 @@ namespace Logic.Propositional
 abbrev TruthAssignment := PropVar → Bool
 
 /-- check if a formula is satisfied by a truth assignment -/
-def satisfies (φ : TruthAssignment) : Formula → Bool
+def eval (φ : TruthAssignment) : Formula → Bool
   | Formula.propvar p => φ p
-  | Formula.neg A => !(satisfies φ A)
-  | Formula.or A B => (satisfies φ A) || (satisfies φ B)
+  | Formula.neg A => !(eval φ A)
+  | Formula.or A B => (eval φ A) || (eval φ B)
+
+
+/-- eval φ A = true -/
+def Satisfies (φ : TruthAssignment) (A : Formula) : Prop :=
+  eval φ A = true
 
 /-- a tautology is a formula that is satisfied by every truth assignment -/
 def tautology (A : Formula) : Prop :=
-  ∀ (φ : TruthAssignment), satisfies φ A = true
+  ∀ φ, Satisfies φ A
 
 /-- a formula is satisfiable if there exists a truth assignment that satisfies it -/
 def satisfiable (A : Formula) : Prop :=
-  ∃ (φ : TruthAssignment), satisfies φ A = true
+  ∃ φ, Satisfies φ A
 
 def unsatisfiable (A : Formula) : Prop :=
   ¬ satisfiable A
 
-/-- finite or infinite set of formulas -/
-abbrev FormulaSet := Formula → Prop
+/-- ∀ A ∈ Γ, Satisfies φ A -/
+def SatisfiesSet (φ : TruthAssignment) (Γ : Set Formula) : Prop :=
+  ∀ A ∈ Γ, Satisfies φ A
 
 /-- a set of formulas is satisfiable if there exists a truth assignment that satisfies all formulas in the set -/
-def satisfiableSet (Γ : FormulaSet) : Prop :=
-  ∃ (φ : TruthAssignment), ∀ (A : Formula), Γ A → satisfies φ A = true
+def satisfiableSet (Γ : Set Formula) : Prop :=
+  ∃ φ , SatisfiesSet φ Γ
 
-def unsatisfiableSet (Γ : FormulaSet) : Prop :=
+def unsatisfiableSet (Γ : Set Formula) : Prop :=
   ¬ satisfiableSet Γ
 
-/-- Γ⊧B, read "B is a tautological consequence of Γ", means that every truth assignment that satisfies Γ also satisfies B -/
-def tautologicalConsequence (Γ : FormulaSet) (B : Formula) : Prop :=
-  ∀ (φ : TruthAssignment),
-    (∀ (A : Formula), Γ A → satisfies φ A = true) → satisfies φ B = true
+/-- Γ⊧B, read "B is a tautological consequence of Γ", means that
+    every truth assignment that satisfies Γ also satisfies B
+-/
+def tautologicalConsequence (Γ : Set Formula) (B : Formula) : Prop :=
+  ∀ φ, SatisfiesSet φ Γ → Satisfies φ B
 
-/-- union of two sets of formulas -/
-def setUnion (Γ Δ : FormulaSet) : FormulaSet :=
-  fun A => Γ A ∨ Δ A
-
-/-- singleton set containing a single formula -/
-def singletonSet (B : Formula) : FormulaSet :=
-  fun A => A = B
+def finitelySatisfiableSet (Γ : Set Formula) : Prop :=
+  ∀ Δ, (Set.Finite Δ ∧ Δ ⊆ Γ) → satisfiableSet Δ
 
 end Logic.Propositional
